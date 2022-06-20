@@ -4,6 +4,12 @@ const router = express.Router();
 
 const fs = require('fs').promises;
 
+const {
+  isEmailValid,
+  isPasswordValid,
+  randomToken,
+} = require('../middlewares/validations');
+
 router.get('/talker', async (_req, res) => {
   const talkers = await fs.readFile('./talker.json', 'utf8');
   
@@ -18,5 +24,12 @@ router.get('/talker/:id', async (req, res) => {
   if (!talkerId) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   return res.status(200).json(talkerId);
 });
+
+router.post(
+  '/login',
+  isEmailValid,
+  isPasswordValid,
+  (_req, res) => res.status(200).json({ token: randomToken() }),
+);
 
 module.exports = router;
