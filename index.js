@@ -1,6 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const talkersRoutes = require('./routes/talkersRoutes');
+
+const readerFile = require('./helpers/readerFile');
+
+const {
+  isEmailValid,
+  isPasswordValid,
+  randomToken,
+} = require('./middlewares/validations');
 
 const app = express();
 app.use(bodyParser.json());
@@ -17,4 +24,24 @@ app.listen(PORT, () => {
   console.log('Online');
 });
 
-app.use(talkersRoutes);
+app.get('/talker', async (_req, res) => {
+  const talkers = await readerFile();
+  
+  return (res.status(HTTP_OK_STATUS).json(talkers));
+});
+
+app.get('/talker/:id', async (req, res) => {
+  const talkers = await readerFile();
+  const { id } = req.params;
+  const talkerId = talkers.find((talker) => talker.id === parseInt(id, 10));
+
+  if (!talkerId) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+  return res.status(HTTP_OK_STATUS).json(talkerId);
+});
+
+app.post(
+  '/login',
+  isEmailValid,
+  isPasswordValid,
+  (_req, res) => res.status(HTTP_OK_STATUS).json({ token: randomToken() }),
+);
