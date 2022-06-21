@@ -8,6 +8,12 @@ const {
   isEmailValid,
   isPasswordValid,
   randomToken,
+  isTokenValid,
+  nameRequired,
+  isNameValid,
+  isAgeValid,
+  agePlus18,
+  talkRequired,
 } = require('../middlewares/validations');
 
 router.get('/talker', async (_req, res) => {
@@ -30,6 +36,28 @@ router.post(
   isEmailValid,
   isPasswordValid,
   (_req, res) => res.status(200).json({ token: randomToken() }),
+);
+
+router.post(
+  '/talker',
+  isTokenValid,
+  nameRequired,
+  isNameValid,
+  isAgeValid,
+  agePlus18,
+  talkRequired,
+  async (req, res) => {
+    let talkers = await fs.readFile('./talker.json', 'utf-8');
+    talkers = JSON.parse(talkers);
+
+    const { name, age, talk: { watchedAt, rate } } = req.body;
+
+    talkers.push({ name, age, id: talkers.length + 1, talk: { watchedAt, rate } });
+
+    await fs.writeFile('./talker.json', JSON.stringify(talkers), 'utf-8');
+
+    res.status(201).json({ name, age, id: talkers.length, talk: { watchedAt, rate } });  
+  },
 );
 
 module.exports = router;
