@@ -95,6 +95,49 @@ const talkRequired = (req, res, next) => {
   next();
 };
 
+const rateRequired = (req, res, next) => {
+  if (req.body.talk.rate === undefined) {
+    return (res.status(400).json({
+      message: 'O campo "rate" é obrigatório',
+    }));
+  }
+
+  next();
+};
+
+const isRateValid = (req, res, next) => {
+  const { talk: { rate } } = req.body;
+
+  if (!Number.isInteger(rate) || rate < 1 || rate > 5) {
+    return (res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' }));
+  }
+
+  next();
+};
+
+const watchedAtRequired = (req, res, next) => {
+  if (req.body.talk === undefined || req.body.talk.watchedAt === undefined) {
+    return (res.status(400).json({
+      message: 'O campo "watchedAt" é obrigatório',
+    }));
+  }
+
+  next();
+};
+
+const watchedAtValid = (req, res, next) => {
+  const { talk: { watchedAt } } = req.body;
+  const date = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+  if (!watchedAt.match(date)) {
+    return (res.status(400).json({
+      message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"',
+    }));
+  }
+
+  next();
+};
+
 const isTokenValid = (req, res, next) => {
   const token = req.headers.authorization;
 
@@ -114,5 +157,9 @@ module.exports = {
   isAgeValid,
   agePlus18,
   talkRequired,
+  rateRequired,
+  isRateValid,
+  watchedAtRequired,
+  watchedAtValid,
   isTokenValid,
 };

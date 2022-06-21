@@ -13,7 +13,11 @@ const {
   isNameValid,
   isAgeValid,
   agePlus18,
+  rateRequired,
+  isRateValid,
   talkRequired,
+  watchedAtRequired,
+  watchedAtValid,
 } = require('../middlewares/validations');
 
 router.get('/talker', async (_req, res) => {
@@ -40,23 +44,28 @@ router.post(
 
 router.post(
   '/talker',
-  isTokenValid,
   nameRequired,
   isNameValid,
   isAgeValid,
   agePlus18,
+  rateRequired,
+  isRateValid,
   talkRequired,
+  watchedAtRequired,
+  watchedAtValid,
+  isTokenValid,
   async (req, res) => {
-    let talkers = await fs.readFile('./talker.json', 'utf-8');
-    talkers = JSON.parse(talkers);
+    const talkers = JSON.parse(await fs.readFile('./talker.json', 'utf-8'));
 
-    const { name, age, talk: { watchedAt, rate } } = req.body;
+    const { name, age, talk } = req.body;
 
-    talkers.push({ name, age, id: talkers.length + 1, talk: { watchedAt, rate } });
+    const newTalkers = { id: talkers.length + 1, name, age, talk };
+
+    talkers.push(newTalkers);
 
     await fs.writeFile('./talker.json', JSON.stringify(talkers), 'utf-8');
 
-    res.status(201).json({ name, age, id: talkers.length, talk: { watchedAt, rate } });  
+    res.status(201).json(newTalkers);  
   },
 );
 
