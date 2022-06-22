@@ -2,11 +2,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const readerFile = require('./helpers/readerFile');
+const writerFile = require('./helpers/writerFile');
 
 const {
   isEmailValid,
   isPasswordValid,
   randomToken,
+  isNameValid,
+  isAgeValid,
+  isTalkValid,
+  isRateValid,
+  isWatchedAtValid,
+  isTokenValid,
 } = require('./middlewares/validations');
 
 const app = express();
@@ -44,4 +51,23 @@ app.post(
   isEmailValid,
   isPasswordValid,
   (_req, res) => res.status(HTTP_OK_STATUS).json({ token: randomToken() }),
+);
+
+app.post(
+  '/talker',
+  isTokenValid,
+  isNameValid,
+  isAgeValid,
+  isTalkValid,
+  isRateValid,
+  isWatchedAtValid,
+  async (req, res) => {
+    const talkers = await readerFile();
+    const newTalker = { ...req.body, id: talkers.length + 1 };
+    talkers.push(newTalker);
+
+    writerFile(talkers);
+
+    res.status(201).json(newTalker);
+  },
 );

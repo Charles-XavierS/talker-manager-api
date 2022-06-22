@@ -38,19 +38,13 @@ const randomToken = () => {
   return result;
 };
 
-const nameRequired = (req, res, next) => {
+const isNameValid = (req, res, next) => {
   const { name } = req.body;
 
   if (!name) {
     return (res.status(400).json({
       message: 'O campo "name" é obrigatório' }));
   }
-
-  next();
-};
-
-const isNameValid = (req, res, next) => {
-  const { name } = req.body;
 
   if (name && name.length < 3) {
     return (res.status(400).json({
@@ -66,13 +60,7 @@ const isAgeValid = (req, res, next) => {
   if (!age || age === undefined) {
     return res.status(400).json({
       message: 'O campo "age" é obrigatório' });
-    }
-
-  next();
-};
-
-const agePlus18 = (req, res, next) => {
-  const { age } = req.body;
+  }
 
   if (age < 18) {
     return (res.status(400).json({
@@ -83,7 +71,7 @@ const agePlus18 = (req, res, next) => {
   next();
 };
 
-const talkRequired = (req, res, next) => {
+const isTalkValid = (req, res, next) => {
   const { talk } = req.body;
 
   if (!talk || talk.length === 0 || talk === undefined) {
@@ -95,18 +83,14 @@ const talkRequired = (req, res, next) => {
   next();
 };
 
-const rateRequired = (req, res, next) => {
-  if (req.body.talk.rate === undefined) {
+const isRateValid = (req, res, next) => {
+  const { talk: { rate } } = req.body;
+
+  if (rate === undefined) {
     return (res.status(400).json({
       message: 'O campo "rate" é obrigatório',
     }));
   }
-
-  next();
-};
-
-const isRateValid = (req, res, next) => {
-  const { talk: { rate } } = req.body;
 
   if (!Number.isInteger(rate) || rate < 1 || rate > 5) {
     return (res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' }));
@@ -115,19 +99,15 @@ const isRateValid = (req, res, next) => {
   next();
 };
 
-const watchedAtRequired = (req, res, next) => {
-  if (req.body.talk === undefined || req.body.talk.watchedAt === undefined) {
+const isWatchedAtValid = (req, res, next) => {
+  const { talk: { watchedAt } } = req.body;
+  const date = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+  if (watchedAt === undefined) {
     return (res.status(400).json({
       message: 'O campo "watchedAt" é obrigatório',
     }));
   }
-
-  next();
-};
-
-const watchedAtValid = (req, res, next) => {
-  const { talk: { watchedAt } } = req.body;
-  const date = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
 
   if (!watchedAt.match(date)) {
     return (res.status(400).json({
@@ -152,14 +132,10 @@ module.exports = {
   isEmailValid,
   isPasswordValid,
   randomToken,
-  nameRequired,
   isNameValid,
   isAgeValid,
-  agePlus18,
-  talkRequired,
-  rateRequired,
+  isTalkValid,
   isRateValid,
-  watchedAtRequired,
-  watchedAtValid,
+  isWatchedAtValid,
   isTokenValid,
 };
