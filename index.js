@@ -37,6 +37,18 @@ app.get('/talker', async (_req, res) => {
   return (res.status(HTTP_OK_STATUS).json(talkers));
 });
 
+app.get('/talker/search', isTokenValid, async (req, res) => {
+  const { q } = req.query;
+  const talkers = await readerFile();
+
+  const result = talkers.filter(({ name }) => name.includes(q));
+  res.status(HTTP_OK_STATUS).json(result);
+
+  if (!q) {
+    res.status(HTTP_OK_STATUS).json(talkers);
+  }
+});
+
 app.get('/talker/:id', async (req, res) => {
   const talkers = await readerFile();
   const { id } = req.params;
