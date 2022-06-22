@@ -71,3 +71,27 @@ app.post(
     res.status(201).json(newTalker);
   },
 );
+
+app.put(
+  '/talker/:id',
+  isTokenValid,
+  isNameValid,
+  isAgeValid,
+  isTalkValid,
+  isRateValid,
+  isWatchedAtValid,
+  async (req, res) => {
+    const { id } = req.params;
+    const talkers = await readerFile();
+
+    const idIndex = talkers.findIndex((talker) => talker.id === +id);
+    talkers[idIndex] = {
+      id: +id,
+      ...req.body,
+    };
+
+    await writerFile(talkers);
+
+    res.status(HTTP_OK_STATUS).json(talkers[idIndex]);
+  },
+);
