@@ -32,14 +32,14 @@ app.listen(PORT, () => {
 });
 
 app.get('/talker', async (_req, res) => {
-  const talkers = await readerFile();
+  const talkers = JSON.parse(await readerFile());
   
   return (res.status(HTTP_OK_STATUS).json(talkers));
 });
 
 app.get('/talker/search', isTokenValid, async (req, res) => {
   const { q } = req.query;
-  const talkers = await readerFile();
+  const talkers = JSON.parse(await readerFile());
 
   const result = talkers.filter(({ name }) => name.includes(q));
   res.status(HTTP_OK_STATUS).json(result);
@@ -50,7 +50,7 @@ app.get('/talker/search', isTokenValid, async (req, res) => {
 });
 
 app.get('/talker/:id', async (req, res) => {
-  const talkers = await readerFile();
+  const talkers = JSON.parse(await readerFile());
   const { id } = req.params;
   const talkerId = talkers.find((talker) => talker.id === parseInt(id, 10));
 
@@ -74,7 +74,7 @@ app.post(
   isRateValid,
   isWatchedAtValid,
   async (req, res) => {
-    const talkers = await readerFile();
+    const talkers = JSON.parse(await readerFile());
     const newTalker = { ...req.body, id: talkers.length + 1 };
     talkers.push(newTalker);
 
@@ -94,7 +94,7 @@ app.put(
   isWatchedAtValid,
   async (req, res) => {
     const { id } = req.params;
-    const talkers = await readerFile();
+    const talkers = JSON.parse(await readerFile());
 
     const idIndex = talkers.findIndex((talker) => talker.id === +id);
     talkers[idIndex] = {
@@ -105,5 +105,23 @@ app.put(
     await writerFile(talkers);
 
     res.status(HTTP_OK_STATUS).json(talkers[idIndex]);
+  },
+);
+
+app.delete(
+  '/talker/:id',
+  isTokenValid,
+  async (req, res) => {
+    const { id } = req.params;
+    const talkers = JSON.parse(await readerFile());
+
+    const index = (talker) => parseInt(talker.id, 10) === parseInt(id, 10);
+    const indexFind = talkers.findIndex(index);
+
+    delete talkers[indexFind];
+
+    writerFile(talkers);
+
+    res.status(204).end();
   },
 );
